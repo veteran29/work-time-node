@@ -6,4 +6,6 @@ Built with:
  * Sequelize
  * SQLite
  * Express
- * Socket.IO   
+ * Socket.IO
+ * Bootstrap 4
+ * Vue

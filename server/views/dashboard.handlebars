@@ -1,0 +1,65 @@
+{{{{raw-helper}}}}
+<nav class="navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">WT Dashboard</a>
+</nav>
+<div class="container-fluid" style="margin-top: 1rem;">
+    <div class="row">
+
+        <div id="app" class="col-md-12">
+            <div class="row">
+
+                <div class="col-md-3" style="text-align: center;">
+                    <div class="card border-secondary">
+                        <div class="card-header bg-dark text-light"><h3>Obecnie pracuje</h3></div>
+                        <div class="card-body">
+                            <p id="connections" style="font-size: 96px;line-height: 96px;">{{workingCount}}</p>
+                        </div>
+                        <div class="card-footer bg-dark text-light"><h5>osób</h5></div>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+
+                    <legend>Aktualnie realizowane zadania</legend>
+                    <div class="row">
+                        <table id="current-report" class="table table-bordered table-striped table-condensed table-hover">
+                            <thead>
+                            <tr class="bg-dark text-light">
+                                <td>Realizujący</td>
+                                <td>Zadanie</td>
+                                <td>Czas pracy</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="user in currentlyWorking">
+                                <td>{{user.username}}</td>
+                                <td>{{user.taskId}}</td>
+                                <td>{{secondsToTime(user.workedSeconds)}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <legend>Zadania z tego miesiąca</legend>
+                    <div class="row">
+                        <table id="month-report" class="table table-bordered table-striped table-condensed table-hover">
+                            <thead>
+                            <tr class="bg-dark text-light">
+                                <td>Realizujący</td>
+                                <td>Zadanie</td>
+                                <td>Czas pracy</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+{{{{/raw-helper}}}}
+<script src="js/dashboard.js"></script>

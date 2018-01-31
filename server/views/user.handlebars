@@ -2,6 +2,7 @@
 <script>
     var userSocket = io('/users');
     userSocket.on('connect', function() {
-        userSocket.emit('work-start', { username: '{{name}}' })
-    })
+        userSocket.emit('work-start', { username: '{{name}}', taskId: '{{taskId}}_taskId' })
+        console.log('work-start');
+    });
 </script>
