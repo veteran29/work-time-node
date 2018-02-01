@@ -16,6 +16,7 @@
     "sequelize": "^4.32.2",
     "socket.io": "^2.0.4",
     "socket.io-sequelize": "^1.0.1",
-    "sqlite3": "^3.1.13"
+    "sqlite3": "^3.1.13",
+    "tedious": "^2.3.1"
   }
 }

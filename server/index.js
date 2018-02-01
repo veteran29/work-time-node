@@ -4,7 +4,7 @@ const app = require('express')(),
 	config = require('./config'),
 	path = require('path'),
 	handlebars = require('express-handlebars'),
-	sequelize = require('./db'),
+	sequelize = require('./database/db'),
 	userUtils = require('./util/userUtils')
 
 console.log('starting app port: ', config.port)
@@ -26,7 +26,7 @@ app.get('/user1', function (req, res) {
 	res.render('user', {
 		title: 'user 1',
 		name: 'USER_1',
-		taskId: '1234567890'
+		taskId: '503bab21309ee8612935c166c9ef47400000000020'
 	})
 })
 
@@ -34,7 +34,7 @@ app.get('/user2', function (req, res) {
 	res.render('user', {
 		title: 'user 2',
 		name: 'USER_2',
-		taskId: '0987654321'
+		taskId: '503bab21309ee8612935c166c9ef47400000000031'
 	})
 })
 
