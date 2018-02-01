@@ -5,55 +5,55 @@ const app = require('express')(),
 	path = require('path'),
 	handlebars = require('express-handlebars'),
 	sequelize = require('./database/db'),
-	userUtils = require('./util/userUtils')
+	userUtils = require('./util/userUtils');
 
-console.log('starting app port: ', config.port)
-console.debug = console.log.bind(null, 'debug: ')
-server.listen(config.port)
+console.log('starting app port: ', config.port);
+console.debug = console.log.bind(null, 'debug: ');
+server.listen(config.port);
 
-app.use(require('express').static(path.resolve(__dirname, '../static')))
+app.use(require('express').static(path.resolve(__dirname, '../static')));
 
 app.engine('handlebars', handlebars({
 	defaultLayout: 'main',
 	layoutsDir: 'server/views/layouts',
-	partials: 'server/views/partials'
-}))
+	partials: 'server/views/partials',
+}));
 
-app.set('view engine', 'handlebars')
-app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'handlebars');
+app.set('views', path.join(__dirname, 'views'));
 
 app.get('/user1', function (req, res) {
 	res.render('user', {
 		title: 'user 1',
 		name: 'USER_1',
-		taskId: '503bab21309ee8612935c166c9ef47400000000020'
-	})
-})
+		taskId: '503bab21309ee8612935c166c9ef47400000000020',
+	});
+});
 
 app.get('/user2', function (req, res) {
 	res.render('user', {
 		title: 'user 2',
 		name: 'USER_2',
-		taskId: '503bab21309ee8612935c166c9ef47400000000031'
-	})
-})
+		taskId: '503bab21309ee8612935c166c9ef47400000000031',
+	});
+});
 
 app.get('/dashboard', function (req, res) {
 	res.render('dashboard', {
 		title: 'WT Dashboard',
 		helpers: {
 			'raw-helper': function (options) {
-				return options.fn()
-			}
-		}
-	})
-})
+				return options.fn();
+			},
+		},
+	});
+});
 
-const userIo = require('./sockets/users')(io)
-const dashboardIo = require('./sockets/dashboard')(io)
+const userIo = require('./sockets/users')(io);
+const dashboardIo = require('./sockets/dashboard')(io);
 
 userIo.on('connection', function (socket) {
-	console.debug('connection')
+	console.debug('connection');
 	let connectionWorkTime;
 
 	socket.on('work-start', function (msg) {
@@ -63,8 +63,8 @@ userIo.on('connection', function (socket) {
 			.findOrCreate({
 				where: {
 					username: msg.username,
-					taskId: msg.taskId
-				}
+					taskId: msg.taskId,
+				},
 			}).then(workTimes => workTimes[0]).then((workTime) => {
 			connectionWorkTime = workTime;
 			connectionWorkTime.working = true;
@@ -72,13 +72,13 @@ userIo.on('connection', function (socket) {
 
 			let interval = setInterval(() => {
 				if (connectionWorkTime.working === false) {
-					clearInterval(interval)
+					clearInterval(interval);
 				}
-				console.debug('work-update', connectionWorkTime.username, connectionWorkTime.workedSeconds, 'for task', connectionWorkTime.taskId)
+				console.debug('work-update', connectionWorkTime.username, connectionWorkTime.workedSeconds, 'for task', connectionWorkTime.taskId);
 				lastWorkedTime = userUtils.updateUserWorkTime(workTime, lastWorkedTime);
 
-				dashboardIo.emit('work-update', { id: workTime.id, time: workTime.workedSeconds });
-			}, 1500)
+				dashboardIo.emit('work-update', {id: workTime.id, time: workTime.workedSeconds});
+			}, 1500);
 		}).then(() => {
 			// inform dashboard about new user
 			dashboardIo.emit('work-start', connectionWorkTime);
@@ -86,8 +86,8 @@ userIo.on('connection', function (socket) {
 
 		socket.on('disconnect', function () {
 			if (connectionWorkTime) {
-				connectionWorkTime.working = false
-				connectionWorkTime.save()
+				connectionWorkTime.working = false;
+				connectionWorkTime.save();
 
 				dashboardIo.emit('work-stop', connectionWorkTime);
 
