@@ -7,7 +7,7 @@ const config = {
 
 config.internalDb = {
 	databaseName: 'work-time-logger',
-	databaseConfig: {
+	sequelizeConfig: {
 		dialect: 'sqlite',
 
 		pool: {

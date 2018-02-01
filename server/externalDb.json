@@ -1,4 +1,5 @@
 {
+  "host": "localhost",
   "databaseName": "databasename",
   "username": "sa",
   "password": "supersecretpassword",
