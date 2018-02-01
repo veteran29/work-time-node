@@ -5,6 +5,7 @@ const app = require('express')(),
 	path = require('path'),
 	handlebars = require('express-handlebars'),
 	sequelize = require('./database/db'),
+	externalSequelize = require('./database/externalDb'),
 	userUtils = require('./util/userUtils');
 
 console.log('starting app port: ', config.port);
@@ -49,6 +50,8 @@ app.get('/dashboard', function (req, res) {
 	});
 });
 
+const taskContainer = require('./util/taskContainer');
+
 const userIo = require('./sockets/users')(io);
 const dashboardIo = require('./sockets/dashboard')(io);
 
@@ -77,11 +80,21 @@ userIo.on('connection', function (socket) {
 				console.debug('work-update', connectionWorkTime.username, connectionWorkTime.workedSeconds, 'for task', connectionWorkTime.taskId);
 				lastWorkedTime = userUtils.updateUserWorkTime(workTime, lastWorkedTime);
 
-				dashboardIo.emit('work-update', {id: workTime.id, time: workTime.workedSeconds});
+				dashboardIo.emit('work-update', { id: workTime.id, time: workTime.workedSeconds });
 			}, 1500);
 		}).then(() => {
 			// inform dashboard about new user
-			dashboardIo.emit('work-start', connectionWorkTime);
+
+			externalSequelize.models.TaskDetails.findById(connectionWorkTime.taskId)
+				.then((result) => {
+					return result === null ? { taskName: connectionWorkTime.taskId } : result.dataValues;
+				})
+				.then((data) => {
+					console.debug('fetched data about task', data.taskName);
+					const taskData = { workTime: connectionWorkTime, taskName: data.taskName };
+					dashboardIo.emit('work-start', taskData);
+					taskContainer.add(taskData);
+				});
 		});
 
 		socket.on('disconnect', function () {
@@ -90,10 +103,25 @@ userIo.on('connection', function (socket) {
 				connectionWorkTime.save();
 
 				dashboardIo.emit('work-stop', connectionWorkTime);
-
+				taskContainer.remove(connectionWorkTime.id);
 				console.log('user disconnected', connectionWorkTime);
 			}
 		});
+	});
+});
+
+dashboardIo.on('connection', function (socket) {
+	console.debug('dashboard connected');
+	socket.emit('currently-working', taskContainer.tasks);
+
+	sequelize.models.WorkTime.findAll({
+		attributes: [
+			'username',
+			[sequelize.fn('SUM', sequelize.col('workedSeconds')), 'workedSum'],
+		],
+		group: ['WorkTime.username'],
+	}).then((result) => {
+		socket.emit('recent-tasks', result);
 	});
 });
 

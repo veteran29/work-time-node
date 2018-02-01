@@ -2,12 +2,13 @@ new Vue({
 	el: '#app',
 	data: function () {
 		return {
-			currentlyWorking: [],
+			currentlyWorking: {},
+			recentTasks: [],
 		};
 	},
 	computed: {
 		workingCount: function () {
-			return this.currentlyWorking.length;
+			return Object.getOwnPropertyNames(this.currentlyWorking).length - 1;
 		},
 	},
 	mounted: function () {
@@ -15,40 +16,43 @@ new Vue({
 		console.info('dashboardMounted');
 		vm.$socket = io('/dashboard');
 
-		vm.$socket.on('work-start', function (workTime) {
-			console.debug('work-start', workTime, workTime.username);
-			vm.addCurrentlyWorking(workTime);
+		vm.$socket.on('currently-working', function (currentData) {
+			vm.currentlyWorking = currentData;
+
+			vm.$socket.on('work-start', function (workTime) {
+				console.debug('work-start', workTime, workTime.username);
+				vm.addCurrentlyWorking(workTime);
+			});
+
+			vm.$socket.on('work-stop', function (workTime) {
+				console.debug('work-stop', workTime, workTime.username);
+				vm.removeCurrentlyWorking(workTime);
+			});
+
+			vm.$socket.on('work-update', function (workTime) {
+				console.debug('work-update', workTime);
+				vm.updateUserWorkTime(workTime);
+			});
 		});
 
-		vm.$socket.on('work-stop', function (workTime) {
-			console.debug('work-stop', workTime, workTime.username);
-			vm.removeCurrentlyWorking(workTime);
+		vm.$socket.on('recent-tasks', function (data) {
+			vm.recentTasks = data;
 		});
-
-		vm.$socket.on('work-update', function (workTime) {
-			console.debug('work-update', workTime);
-			vm.updateUserWorkTime(workTime);
-		});
-
 	},
 	methods: {
-		addCurrentlyWorking: function (workTime) {
-			this.currentlyWorking.push(workTime);
+		addCurrentlyWorking: function (data) {
+			this.$set(this.currentlyWorking, data.workTime.id, data);
 		},
-		removeCurrentlyWorking: function (workTime) {
-			this.currentlyWorking = this.currentlyWorking.filter(function (x) {
-				return x.id !== workTime.id;
-			});
+		removeCurrentlyWorking: function (data) {
+			this.$delete(this.currentlyWorking, data.id);
 		},
-		updateUserWorkTime: function (workTime) {
-			var workTimes = this.currentlyWorking.filter(function (x) {
-				return x.id === workTime.id;
-			});
-			if (workTimes.length) {
-				workTimes[0].workedSeconds = workTime.time;
+		updateUserWorkTime: function (data) {
+
+			if (this.currentlyWorking[data.id]) {
+				this.currentlyWorking[data.id].workTime.workedSeconds = data.time;
 			}
 			else {
-				console.log('should fetch missing workTime', workTime.id);
+				console.log('should fetch missing workTime', data.id);
 			}
 		},
 		secondsToTime: function (time) {

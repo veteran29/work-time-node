@@ -4,7 +4,7 @@ const Sequelize = require('Sequelize'),
 const sequelize = new Sequelize(config.databaseName, null, null, config.sequelizeConfig);
 
 // Register models
-require('./models/index')(sequelize, sequelize.DataTypes);
+require('../models/index')(sequelize, sequelize.DataTypes);
 
 // Sync models to database
 sequelize.sync();

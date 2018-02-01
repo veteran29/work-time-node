@@ -10,7 +10,11 @@
 
                 <div class="col-md-3" style="text-align: center;">
                     <div class="card border-secondary">
-                        <div class="card-header bg-dark text-light"><h3>Obecnie pracuje</h3></div>
+                        <div class="card-header text-light"
+                             :class="[ workingCount < 1 ? 'bg-dark' : 'bg-success' ]"
+                        >
+                            <h3>Obecnie pracuje</h3>
+                        </div>
                         <div class="card-body">
                             <p id="connections" style="font-size: 96px;line-height: 96px;">{{workingCount}}</p>
                         </div>
@@ -25,32 +29,37 @@
                         <table id="current-report" class="table table-bordered table-striped table-condensed table-hover">
                             <thead>
                             <tr class="bg-dark text-light">
-                                <td>Realizujący</td>
-                                <td>Zadanie</td>
+                                <td width="350px">Realizujący</td>
                                 <td>Czas pracy</td>
+                                <td>Zadanie</td>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="user in currentlyWorking">
-                                <td>{{user.username}}</td>
-                                <td>{{user.taskId}}</td>
-                                <td>{{secondsToTime(user.workedSeconds)}}</td>
+                            <tr v-for="(data, key) in currentlyWorking" :key="key">
+                                <td>{{data.workTime.username}}</td>
+                                <td>{{secondsToTime(data.workTime.workedSeconds)}}</td>
+                                <td>{{data.taskName}}</td>
                             </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <legend>Zadania z tego miesiąca</legend>
+                    <legend>Czas pracy w tym miesiącu</legend>
                     <div class="row">
                         <table id="month-report" class="table table-bordered table-striped table-condensed table-hover">
                             <thead>
                             <tr class="bg-dark text-light">
-                                <td>Realizujący</td>
-                                <td>Zadanie</td>
-                                <td>Czas pracy</td>
+                                <td width="350px">Realizujący</td>
+                                <td colspan="2">Suma czasu pracy</td>
+                                <td></td>
                             </tr>
                             </thead>
                             <tbody>
+                            <tr v-for="(data, idx) in recentTasks" :key="idx">
+                                <td>{{data.username}}</td>
+                                <td>{{secondsToTime(data.workedSum)}}</td>
+                                <td></td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
